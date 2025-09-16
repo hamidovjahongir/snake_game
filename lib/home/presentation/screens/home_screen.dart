@@ -140,7 +140,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('Snake Game')),
       body: Column(
-        
         children: [
           Text('Score: $score', style: TextStyle(fontSize: 24)),
           Container(
