@@ -19,8 +19,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Point<int> food = Point(3, 5);
 
   JoystickPosition position = JoystickPosition.center;
-  Offset snakeHead = Offset(150, 150);
-  double step = 20;
 
   Timer? timer;
   int score = 0;
@@ -30,7 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // timer =  Timer.periodic(const Duration(milliseconds: 250), (_) => _tick());
     timer = Timer.periodic(const Duration(milliseconds: 250), (_) => _tick());
   }
 
@@ -48,7 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!snake.contains(cnd)) {
         setState(() {
           food = cnd;
-          return;
         });
         break;
       }
@@ -57,11 +53,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _tick() {
     if (isGameOver) return;
-
     if (position == JoystickPosition.center) return;
 
     final head = snake.first;
-    Point<int> newHead;
+    late Point<int> newHead;
 
     switch (position) {
       case JoystickPosition.up:
@@ -77,14 +72,13 @@ class _HomeScreenState extends State<HomeScreen> {
         newHead = Point(head.x + 1, head.y);
         break;
       case JoystickPosition.center:
-        newHead = head;
-        break;
+        return;
     }
 
     if (newHead.x < 0 ||
-        newHead.y >= col ||
         newHead.y < 0 ||
-        newHead.x >= row) {
+        newHead.x >= col ||
+        newHead.y >= row) {
       _gameOver();
       return;
     }
@@ -93,9 +87,9 @@ class _HomeScreenState extends State<HomeScreen> {
       _gameOver();
       return;
     }
+
     setState(() {
       snake.insert(0, newHead);
-
       if (newHead == food) {
         score++;
         _spawnFood();
@@ -109,118 +103,97 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       isGameOver = true;
       position = JoystickPosition.center;
-
-      Future.delayed(Duration(seconds: 1), () {
-        snake = [Point(col ~/ 2, row ~/ 2)];
-        position = JoystickPosition.center;
-        score = 0;
-        isGameOver = false;
-        _spawnFood();
-      });
     });
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text("game over"),
+          content: Text("score: $score"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                setState(() {
+                  snake = [Point(col ~/ 2, row ~/ 2)];
+                  score = 0;
+                  isGameOver = false;
+                  _spawnFood();
+                  position = JoystickPosition.right;
+                });
+              },
+              child: Text("start over"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final boardSize = MediaQuery.of(context).size.width - 40;
+    final boardSize = MediaQuery.of(context).size.width;
     final cellSize = boardSize / col;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.amber,
-        title: Text(
-          'Snack Game',
-          style: TextStyle(
+      appBar: AppBar(title: Text('Snake Game')),
+      body: Column(
+        
+        children: [
+          Text('Score: $score', style: TextStyle(fontSize: 24)),
+          Container(
+            width: boardSize,
+            height: boardSize,
             color: Colors.black,
-            fontSize: 30,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'score $score',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w700,
-                fontSize: 30,
-                height: 2,
-              ),
-            ),
+            child: Stack(
+              children: [
+                // Food
+                Positioned(
+                  left: food.x * cellSize,
+                  top: food.y * cellSize,
+                  child: Container(
+                    width: cellSize,
+                    height: cellSize,
+                    color: Colors.red,
+                  ),
+                ),
 
-            Container(
-              width: boardSize,
-              height: boardSize,
-              color: Colors.black,
-              child: Stack(
-                children: [
-                  for (int x = 0; x < col; x++)
-                    for (int y = 0; y < row; y++)
-                      Positioned(
-                        left: x * cellSize,
-                        top: y * cellSize,
-                        child: Container(
-                          width: cellSize,
-                          height: cellSize,
-                          decoration: BoxDecoration(color: Colors.amber),
-                        ),
-                      ),
-
+                // Snake
+                for (int i = 0; i < snake.length; i++)
                   Positioned(
-                    left: food.x * cellSize,
-                    top: food.y * cellSize,
-
+                    left: snake[i].x * cellSize,
+                    top: snake[i].y * cellSize,
                     child: Container(
                       width: cellSize,
                       height: cellSize,
-                      color: Colors.red,
+                      color: i == 0 ? Colors.greenAccent : Colors.green,
                     ),
                   ),
-
-                  for (int i = 0; i < snake.length; i++)
-                    Positioned(
-                      left: snake[i].x * cellSize,
-                      top: snake[i].y * cellSize,
-                      child: Container(
-                        width: cellSize,
-                        height: cellSize,
-                        color: i == 0 ? Colors.greenAccent : Colors.green,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Joystick(
-                  position: (value) {
-                    setState(() {
-                      if ((position == JoystickPosition.left &&
-                              value == JoystickPosition.right) ||
-                          (position == JoystickPosition.right &&
-                              value == JoystickPosition.left) ||
-                          (position == JoystickPosition.up &&
-                              value == JoystickPosition.down) ||
-                          (position == JoystickPosition.down &&
-                              value == JoystickPosition.up)) {
-                        return;
-                      }
-                      position = value;
-                    });
-                  },
-                ),
               ],
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: 20),
+          Joystick(
+            position: (value) {
+              setState(() {
+                if (value == JoystickPosition.center) return;
+                if ((position == JoystickPosition.left &&
+                        value == JoystickPosition.right) ||
+                    (position == JoystickPosition.right &&
+                        value == JoystickPosition.left) ||
+                    (position == JoystickPosition.up &&
+                        value == JoystickPosition.down) ||
+                    (position == JoystickPosition.down &&
+                        value == JoystickPosition.up)) {
+                  return;
+                }
+                position = value;
+              });
+            },
+          ),
+        ],
       ),
     );
   }
