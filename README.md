@@ -18,10 +18,10 @@ Move the snake, eat the food, and score as much as you can! 🎮
 ## 📸 Screenshots
 
 ### 🎮 Gameplay
-<img src="screenshots/Screenshot 2025-09-16 222422.png" alt="screenshot1" width="300"/>
+<img src="screenshots/Screenshot 2025-09-16 222525.png" alt="screenshot1" width="300"/>
 
 ### 💀 Game Over dialog
-<img src="screenshots/Screenshot 2025-09-16 222525.png" alt="screenshot2" width="300"/>
+<img src="screenshots/Screenshot 2025-09-16 222422.png" alt="screenshot2" width="300"/>
 
 ---
 
@@ -33,7 +33,7 @@ Move the snake, eat the food, and score as much as you can! 🎮
 
 ## 📥 Download APK
 
-📦 [Click here to download the APK](https://t.me/coderkhamidov)
+📦 [Click here to download the APK]([https://t.me/coderkhamidov](https://t.me/coderkhamidov/130))
 
 ---
 
